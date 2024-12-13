@@ -30,3 +30,19 @@ __・numpy__: Provides mathematical computation functions, primarily used for ma
 __・yfinance__: This library is used for fetching stock data from Yahoo Finance, capable of automatically downloading historical price data for specified stocks.<br>
 __・matplotlib.pyplot__: Used for generating charts. In the program, this library is used to plot the efficient frontier, capital allocation line, and indifference curve.<br>
 __・scipy.optimize.minimize__: This tool is used for solving optimization problems. In this code, this function is used to calculate the portfolio with the maximum Sharpe ratio.<br>
+
+__2. Parameter Setting and Initialization:__
+
+__・figsize__: Used to set the size of the figures.<br>
+__・rf__: This is the risk-free rate, based on Taiwan's 10-year government bond yield of 1.53% (0.0153) as of December 3, 2024.<br>
+__・num_points__: Defines the number of points within the portfolio return range when calculating the efficient frontier.<br>
+
+
+__3. Fetching Stock Data:__
+
+__・Purpose__: This code fetches historical data for specified stock tickers from Yahoo Finance. It first retrieves the historical data using the yf.Ticker(ticker).history() function and then converts the data to monthly returns (over the past 60 months). If the data is incomplete or unavailable, the stock is skipped.
+__・Fetching Historical Data__: Use yf.Ticker(ticker).history(period='max') to retrieve all historical data for each stock.
+__・Processing Date Format__: Ensure the time index in the retrieved data is DatetimeIndex and remove its timezone information.
+__・Calculating Monthly Returns__: Use resample("M").last().pct_change().iloc[-61:-1] to calculate the monthly returns for each stock over the past 60 months (annual returns are based on monthly returns multiplied by 12).
+__・Filtering Valid Data__: Skip stocks if their data is invalid or missing.
+__・Combining All Stock Data__: Finally, merge the return data of all stocks into one DataFrame and return the list of valid stock tickers.

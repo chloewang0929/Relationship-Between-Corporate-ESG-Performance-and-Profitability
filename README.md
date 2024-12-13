@@ -86,3 +86,33 @@ __・Calculating and Marking the Optimal Complete Portfolio:__ Based on the risk
 __・Graph Settings:__ Set the chart title, X-axis (volatility), and Y-axis (returns), and display the legend and grid lines.<br>
 
 The purpose of this function is to help investors visualize the relationship between risk and return and select the most suitable portfolio based on different risk preferences.
+
+__8. Reading and Processing Excel Data__
+
+The main function of this code is to read the company data from the company_list.xlsx file, randomly select companies or manually select companies based on user-chosen conditions, and calculate and plot the efficient frontier, capital allocation line (CAL), and indifference curve for the maximum Sharpe ratio portfolio based on the stock price data of these companies.
+
+__Steps of the Code:__
+
+__・Read the Excel File and Display Company Data:__<br>
+a) Use the openpyxl library to load the Excel file company_list.xlsx.<br>
+b) Iterate through the sheet names and list the number of companies in each sheet, displaying messages like "112年度公司治理評鑒第 {sheet.title}, 共有 {sheet.max_row} 家公司" (112 Annual Corporate Governance Evaluation, Sheet {sheet.title}, containing {sheet.max_row} companies).
+
+__・User Selection of Company List:__<br>
+a) Users need to select a company list (e.g., 5%, 6-20%, etc.), corresponding to the sheet names.<br>
+b) If the user-entered sheet name exists in the workbook, the data from that sheet is converted into a DataFrame and displayed.
+
+__・Random or Manual Company Selection:__<br>
+a) Users can choose whether to randomly select companies.<br>
+b) If random selection is chosen, a specified number (num) of companies are randomly selected from the chosen company codes for analysis.<br>
+c) If manual selection is chosen, the company codes are provided by the user, separated by /, and only companies from the list are selected.
+
+__・Fetch Stock Data:__<br>
+a) The selected company codes are appended with the .tw suffix to form stock codes suitable for the Taiwan Stock Exchange.<br>
+b) The get_stock_data function is called, which should fetch the historical data of these stocks from a source such as Yahoo Finance or other APIs.
+
+__・Calculate Stock Data Statistics:__<br>
+a) Use the calc_stats function to calculate the mean return (mean) and covariance matrix (cov) of the stocks.
+
+__・Calculate and Plot Maximum Sharpe Ratio Portfolio:__<br>
+a) Use the calc_max_sharpe function to calculate the statistics of the maximum Sharpe ratio portfolio.<br>
+b) Use the plot_efficient_frontier_cal function to plot the efficient frontier, capital allocation line, and indifference curves, and mark the maximum Sharpe ratio portfolio.<br>

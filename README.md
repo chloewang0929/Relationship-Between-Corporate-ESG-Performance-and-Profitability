@@ -52,6 +52,15 @@ __4. Calculating the Mean Return and Covariance Matrix of Stocks:__
 
 In this function, we convert the monthly return data of each stock into a DataFrame format and then calculate the annualized return (multiplied by 12) and the annualized covariance matrix for each stock.
 
-__・pivot(columns="Name", values="Close")__ transforms each stock's data into separate columns for each stock.
-__・mean()__ calculates the average monthly return for each stock and then annualizes it.
-__・cov()__ computes the covariance matrix of the stock returns and annualizes it.
+__・pivot(columns="Name", values="Close")__ transforms each stock's data into separate columns for each stock.<br>
+__・mean()__ calculates the average monthly return for each stock and then annualizes it.<br>
+__・cov()__ computes the covariance matrix of the stock returns and annualizes it.<br>
+
+
+__5. Calculating the Maximum Sharpe Ratio Portfolio:__
+
+The purpose of this function is to calculate the portfolio with the maximum Sharpe ratio. The Sharpe ratio measures the return per unit of risk, and the formula is:
+
+Sharpe Ratio = (Return − Risk Free Rate) / Volatility
+
+The goal of this portfolio is to find the optimal weights by minimizing the negative Sharpe ratio. The minimize function is used for optimization, and the SLSQP method is applied for constrained optimization.

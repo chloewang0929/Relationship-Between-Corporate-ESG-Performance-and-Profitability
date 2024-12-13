@@ -23,10 +23,10 @@ Designed for stock portfolio analysis, the specific purpose is to help investors
 
 __1. Download and import packages:__
 
-__openpyxl__: Used for handling Excel files. In this program, this library is used to read and process the list of companies and related stock codes stored in Excel.
-__random__: Used for randomly selecting companies. During the analysis process, this might involve randomly choosing a certain number of companies for analysis.
-__pandas__: Used for data processing. This library is utilized to handle stock data in DataFrame format, conduct various statistical operations, and perform data cleaning.
-__numpy__: Provides mathematical computation functions, primarily used for matrix operations such as the weighted sum of mean returns and the calculation of covariance matrices.
-__yfinance__: This library is used for fetching stock data from Yahoo Finance, capable of automatically downloading historical price data for specified stocks.
-__matplotlib.pyplot__: Used for generating charts. In the program, this library is used to plot the efficient frontier, capital allocation line, and indifference curve.
-__scipy.optimize.minimize__: This tool is used for solving optimization problems. In this code, this function is used to calculate the portfolio with the maximum Sharpe ratio.
+__openpyxl__: Used for handling Excel files. In this program, this library is used to read and process the list of companies and related stock codes stored in Excel.<br>
+__random__: Used for randomly selecting companies. During the analysis process, this might involve randomly choosing a certain number of companies for analysis.<br>
+__pandas__: Used for data processing. This library is utilized to handle stock data in DataFrame format, conduct various statistical operations, and perform data cleaning.<br>
+__numpy__: Provides mathematical computation functions, primarily used for matrix operations such as the weighted sum of mean returns and the calculation of covariance matrices.<br>
+__yfinance__: This library is used for fetching stock data from Yahoo Finance, capable of automatically downloading historical price data for specified stocks.<br>
+__matplotlib.pyplot__: Used for generating charts. In the program, this library is used to plot the efficient frontier, capital allocation line, and indifference curve.<br>
+__scipy.optimize.minimize__: This tool is used for solving optimization problems. In this code, this function is used to calculate the portfolio with the maximum Sharpe ratio.<br>

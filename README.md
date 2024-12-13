@@ -72,3 +72,17 @@ This function calculates the efficient frontier of a portfolio, which is a curve
 __・Define Volatility Calculation Function:__ Use the portfolio_volatility function to calculate the portfolio's volatility (i.e., risk).<br>
 __・Optimization Process:__ For each target return rate (from the minimum return rate to the maximum return rate), calculate the corresponding optimal portfolio weights and their volatility.<br>
 __・Return the Efficient Frontier:__ Finally, return a DataFrame that includes the volatility and returns for different target return rates.<br>
+
+
+__7. Plotting the Efficient Frontier, Capital Allocation Line, and Indifference Curves:__
+
+This code defines a plot_efficient_frontier_cal function, used to plot the Efficient Frontier, Capital Allocation Line (CAL), and Indifference Curves. These elements help demonstrate the optimal portfolio selection based on different risk preferences in portfolio optimization.
+
+__・Calculating the Efficient Frontier:__ Use the calc_efficient_frontier function to calculate the optimal returns and standard deviations (volatility) at different risk levels, and plot the efficient frontier with a black dashed line.<br>
+__・Plotting the Capital Allocation Line (CAL):__ The CAL shows the relationship between expected return and risk (volatility) when an investor allocates funds between a risk-free asset (such as treasury bills) and high-risk assets. The slope of the CAL represents the maximum Sharpe ratio, indicating the best risk-adjusted return.<br>
+__・Plotting the Indifference Curves:__ Indifference curves display combinations of returns and risks where the investor's attitude towards risk remains consistent on each curve. The risk aversion coefficient A is used to control the intensity of risk preference.<br>
+__・Marking the Maximum Sharpe Ratio Portfolio:__ The maximum Sharpe ratio portfolio is the one that achieves the highest return for a given level of risk. This point is marked in blue on the chart, showing its volatility and return.<br>
+__・Calculating and Marking the Optimal Complete Portfolio:__ Based on the risk aversion coefficient, calculate the optimal complete portfolio (a mix of risk-free assets and the maximum Sharpe ratio portfolio) and mark it in green on the chart.<br>
+__・Graph Settings:__ Set the chart title, X-axis (volatility), and Y-axis (returns), and display the legend and grid lines.<br>
+
+The purpose of this function is to help investors visualize the relationship between risk and return and select the most suitable portfolio based on different risk preferences.

@@ -61,6 +61,14 @@ __5. Calculating the Maximum Sharpe Ratio Portfolio:__
 
 The purpose of this function is to calculate the portfolio with the maximum Sharpe ratio. The Sharpe ratio measures the return per unit of risk, and the formula is:
 
-Sharpe Ratio = (Return − Risk Free Rate) / Volatility
+__Sharpe Ratio = (Return − Risk Free Rate) / Volatility__
 
 The goal of this portfolio is to find the optimal weights by minimizing the negative Sharpe ratio. The minimize function is used for optimization, and the SLSQP method is applied for constrained optimization.
+
+__6. Calculating the Efficient Frontier:__
+
+This function calculates the efficient frontier of a portfolio, which is a curve that shows the minimum risk (volatility) for a given return rate. This is an important concept in Capital Market Theory. For each target return rate, the function optimizes the portfolio weights to minimize risk.
+
+__・Define Volatility Calculation Function:__ Use the portfolio_volatility function to calculate the portfolio's volatility (i.e., risk).<br>
+__・Optimization Process:__ For each target return rate (from the minimum return rate to the maximum return rate), calculate the corresponding optimal portfolio weights and their volatility.<br>
+__・Return the Efficient Frontier:__ Finally, return a DataFrame that includes the volatility and returns for different target return rates.<br>

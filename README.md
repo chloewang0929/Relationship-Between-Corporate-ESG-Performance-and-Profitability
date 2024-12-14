@@ -31,12 +31,27 @@ __・yfinance__: This library is used for fetching stock data from Yahoo Finance
 __・matplotlib.pyplot:__ Used for generating charts. In the program, this library is used to plot the efficient frontier, capital allocation line, and indifference curve.<br>
 __・scipy.optimize.minimize:__ This tool is used for solving optimization problems. In this code, this function is used to calculate the portfolio with the maximum Sharpe ratio.<br>
 
+```python
+import openpyxl 
+import random 
+import pandas as pd
+import numpy as np
+import yfinance as yf
+import matplotlib.pyplot as plt
+from scipy.optimize import minimize
+```
+
 __2. Parameter Setting and Initialization:__
 
 __・figsize:__ Used to set the size of the figures.<br>
 __・rf:__ This is the risk-free rate, based on Taiwan's 10-year government bond yield of 1.53% (0.0153) as of December 3, 2024.<br>
 __・num_points:__ Defines the number of points within the portfolio return range when calculating the efficient frontier.<br>
 
+```python
+figsize = (12, 8)
+rf = 0.0153 
+num_points = 100
+```
 
 __3. Fetching Stock Data:__
 
@@ -47,6 +62,29 @@ __・Calculating Monthly Returns:__ Use resample("M").last().pct_change().iloc[-
 __・Filtering Valid Data:__ Skip stocks if their data is invalid or missing.<br>
 __・Combining All Stock Data:__ Finally, merge the return data of all stocks into one DataFrame and return the list of valid stock tickers.<br>
 
+```python
+def get_stock_data(symbols):
+    data = []
+    valid_symbols = []
+    for ticker in symbols:
+        try:
+            history = yf.Ticker(ticker).history(period='max')
+            if not isinstance(history.index, pd.DatetimeIndex):
+                history.index = pd.to_datetime(history.index)
+            history.index = history.index.tz_localize(None)  # Remove timezone
+            monthly = history.resample("M").last().pct_change().iloc[-61:-1]
+            if monthly.empty:
+                continue
+            monthly["Name"] = ticker
+            data.append(monthly[["Close", "Name"]])
+            valid_symbols.append(ticker)
+        except Exception as e:
+            print(f"Warning: Could not retrieve data for {ticker}. Error: {e}")
+    if not valid_symbols:
+        raise ValueError("No valid symbols to process.")
+    merged = pd.concat(data)
+    return merged, valid_symbols
+```
 
 __4. Calculating the Mean Return and Covariance Matrix of Stocks:__
 
@@ -56,6 +94,13 @@ __・pivot(columns="Name", values="Close")__ transforms each stock's data into s
 __・mean()__ calculates the average monthly return for each stock and then annualizes it.<br>
 __・cov()__ computes the covariance matrix of the stock returns and annualizes it.<br>
 
+```python
+def calc_stats(df):
+    numeric_data = df.pivot(columns="Name", values="Close")
+    mean = numeric_data.mean() * 12  # Annualized mean returns
+    cov = numeric_data.cov() * 12  # Annualized covariance matrix
+    return mean, cov
+```
 
 __5. Calculating the Maximum Sharpe Ratio Portfolio:__
 
@@ -65,6 +110,30 @@ __Sharpe Ratio = (Return − Risk Free Rate) / Volatility__
 
 The goal of this portfolio is to find the optimal weights by minimizing the negative Sharpe ratio. The minimize function is used for optimization, and the SLSQP method is applied for constrained optimization.
 
+```python
+def calc_max_sharpe(mean, cov):
+    def neg_sharpe(weights, mean, cov, rf):
+        ret = np.dot(weights, mean)
+        vol = np.sqrt(np.dot(weights.T, np.dot(cov, weights)))
+        return -(ret - rf) / vol
+
+    constraints = ({"type": "eq", "fun": lambda w: np.sum(w) - 1},)
+    bounds = [(0, 1) for _ in range(len(mean))]
+    result = minimize(
+        neg_sharpe,
+        x0=np.ones(len(mean)) / len(mean),
+        args=(mean, cov, rf),
+        method="SLSQP",
+        bounds=bounds,
+        constraints=constraints
+    )
+    weights = result.x
+    ret = np.dot(weights, mean)
+    vol = np.sqrt(np.dot(weights.T, np.dot(cov, weights)))
+    sharpe_ratio = (ret - rf) / vol
+    return {"Returns": ret, "Volatility": vol, "Weights": weights, "Sharpe Ratio": sharpe_ratio}
+```
+
 __6. Calculating the Efficient Frontier:__
 
 This function calculates the efficient frontier of a portfolio, which is a curve that shows the minimum risk (volatility) for a given return rate. This is an important concept in Capital Market Theory. For each target return rate, the function optimizes the portfolio weights to minimize risk.
@@ -73,6 +142,30 @@ __・Define Volatility Calculation Function:__ Use the portfolio_volatility func
 __・Optimization Process:__ For each target return rate (from the minimum return rate to the maximum return rate), calculate the corresponding optimal portfolio weights and their volatility.<br>
 __・Return the Efficient Frontier:__ Finally, return a DataFrame that includes the volatility and returns for different target return rates.<br>
 
+```python
+def calc_efficient_frontier(mean, cov, num_points):
+    def portfolio_volatility(weights, mean, cov):
+        return np.sqrt(np.dot(weights.T, np.dot(cov, weights)))
+
+    results = []
+    for target_return in np.linspace(mean.min(), mean.max(), num_points):
+        constraints = (
+            {"type": "eq", "fun": lambda w: np.sum(w) - 1},
+            {"type": "eq", "fun": lambda w: np.dot(w, mean) - target_return}
+        )
+        bounds = [(0, 1) for _ in range(len(mean))]
+        weights = minimize(
+            portfolio_volatility,
+            x0=np.ones(len(mean)) / len(mean),
+            args=(mean, cov),
+            method="SLSQP",
+            bounds=bounds,
+            constraints=constraints
+        )
+        vol = portfolio_volatility(weights.x, mean, cov)
+        results.append({"Returns": target_return, "Volatility": vol})
+    return pd.DataFrame(results)
+```
 
 __7. Plotting the Efficient Frontier, Capital Allocation Line, and Indifference Curves:__
 
@@ -86,6 +179,55 @@ __・Calculating and Marking the Optimal Complete Portfolio:__ Based on the risk
 __・Graph Settings:__ Set the chart title, X-axis (volatility), and Y-axis (returns), and display the legend and grid lines.<br>
 
 The purpose of this function is to help investors visualize the relationship between risk and return and select the most suitable portfolio based on different risk preferences.
+
+```python
+def plot_efficient_frontier_cal(mean, cov, max_sharpe_port):
+    eff_frontier = calc_efficient_frontier(mean, cov, num_points)
+
+    plt.figure(figsize=figsize)
+
+    # Efficient Frontier
+    plt.plot(eff_frontier["Volatility"], eff_frontier["Returns"], "k--", label="Efficient Frontier")
+
+    # Capital Allocation Line (CAL)
+    cal_x = np.linspace(0, max(eff_frontier["Volatility"]), 100)
+    cal_y = rf + (max_sharpe_port["Sharpe Ratio"]) * cal_x
+    plt.plot(cal_x, cal_y, "orange", label="Capital Allocation Line (CAL)")
+
+    # Indifference Curve
+    A = 4  # Risk aversion coefficient
+    optimal_y = (max_sharpe_port["Returns"] - rf) / (A * max_sharpe_port["Volatility"]**2)
+    optimal_u = rf + optimal_y * (max_sharpe_port["Returns"] - rf) - 0.5 * A * optimal_y**2 * max_sharpe_port["Volatility"]**2
+    indifference_sigma = np.linspace(0, max(cal_x), 100)
+    indifference_return = optimal_u + 0.5 * A * np.square(indifference_sigma)
+    plt.plot(indifference_sigma, indifference_return, "r--", label="Indifference Curve")
+
+    # Mark the Maximum Sharpe Ratio Portfolio
+    plt.scatter(max_sharpe_port["Volatility"], max_sharpe_port["Returns"], color="b", s=100, label="Max Sharpe Ratio Portfolio")
+    plt.annotate(
+        f"({max_sharpe_port['Volatility']:.2f}, {max_sharpe_port['Returns']:.2f})",
+        (max_sharpe_port["Volatility"], max_sharpe_port["Returns"]),
+        textcoords="offset points", xytext=(10, -10), ha="center", color="blue"
+    )
+    
+    # Calculating the Complete Portfolio Return and Volatility
+    complete_return_good = rf + optimal_y * (max_sharpe_port["Returns"] - rf)
+    complete_std_good = (complete_return_good - rf) / max_sharpe_port["Sharpe Ratio"]
+    plt.scatter(complete_std_good, complete_return_good, color="g", s=100, label="Optimal Complete Portfolio")
+    plt.annotate(
+        f"({complete_std_good:.2f}, {complete_return_good:.2f})",
+        (complete_std_good, complete_return_good),
+        textcoords="offset points", xytext=(10, 10), ha="center", color="green"
+    )
+
+    # Plot details
+    plt.title("Efficient Frontier, CAL, and Indifference Curve")
+    plt.xlabel("Volatility (Standard Deviation)")
+    plt.ylabel("Returns")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+```
 
 __8. Reading and Processing Excel Data__
 
@@ -117,6 +259,51 @@ __・Calculate and Plot Maximum Sharpe Ratio Portfolio:__<br>
 a) Use the calc_max_sharpe function to calculate the statistics of the maximum Sharpe ratio portfolio.<br>
 b) Use the plot_efficient_frontier_cal function to plot the efficient frontier, capital allocation line, and indifference curves, and mark the maximum Sharpe ratio portfolio.<br>
 
+
+```python
+def get_values(sheet):
+    return [[cell.value for cell in row] for row in sheet]
+
+# Main Program
+wb = openpyxl.load_workbook('company_list.xlsx')
+names = wb.sheetnames
+
+for name in names:
+    sheet = wb[name]
+    print(f'112年度公司治理評鑒第 {sheet.title}, 共有 {sheet.max_row} 家公司')
+
+choose_sheet = input("請輸入欲選擇的列表（5%/6-20%/21-35%/36-50%/51-65%/66-80%/81-100%）：")
+if choose_sheet in names:
+    code_lst = get_values(wb[choose_sheet])
+    codes = [str(row[0]) for row in code_lst]
+    code_df = pd.DataFrame(code_lst, columns=["Stock Code", "Company Name"])
+    print(code_df)
+
+    ran = input("是否想要隨機選擇（請輸入Y/N）：")
+    if ran == "Y":
+        random.shuffle(codes)
+        num = int(input("欲隨機選取幾家公司？"))
+        company_lst = codes[:num]
+        print(f'將以 {company_lst} 計算')
+    elif ran == "N":
+        com = input("請輸入欲查詢的公司代碼並以 / 隔開（例：1101/1102/1103）：")
+        company_lst = [c for c in com.split("/") if c in codes]
+        print(f'將以 {company_lst} 計算')
+    else:
+        print("請重新輸入")
+else:
+    print("請輸入正確列表")
+
+symbols = [c + '.tw' for c in company_lst]
+
+# Fetch data and calculate statistics
+merge_stock, valid_symbols = get_stock_data(symbols)
+mean, cov = calc_stats(merge_stock)
+
+# Find and plot the Maximum Sharpe Ratio portfolio
+max_sharpe_port = calc_max_sharpe(mean, cov)
+plot_efficient_frontier_cal(mean, cov, max_sharpe_port)
+```
 
 # Research Findings
 

@@ -308,10 +308,15 @@ __9. Demo Example:__
 
 Randomly select 40 companies from the top 5% and the bottom 80% of the Corporate Governance Evaluation lists as examples.
 __・Display the number of companies in each list:__
+![My Image](pic1.png)
 __・Select 40 random companies from the top 5%:__
+![My Image](pic2.png)
 Result: Sharpe Ratio = 1.79
+![My Image](pic3.png)
 __・Select 40 random companies from the bottom 81-100%:__
+![My Image](pic4.png)
 Result: Sharpe Ratio = 2.09
+![My Image](pic5.png)
 
 # Research Findings
 

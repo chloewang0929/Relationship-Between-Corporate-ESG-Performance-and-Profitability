@@ -304,6 +304,14 @@ mean, cov = calc_stats(merge_stock)
 max_sharpe_port = calc_max_sharpe(mean, cov)
 plot_efficient_frontier_cal(mean, cov, max_sharpe_port)
 ```
+__9. Demo Example:__
+
+Randomly select 40 companies from the top 5% and the bottom 80% of the Corporate Governance Evaluation lists as examples.
+__・Display the number of companies in each list:__
+__・Select 40 random companies from the top 5%:__
+Result: Sharpe Ratio = 1.79
+__・Select 40 random companies from the bottom 81-100%:__
+Result: Sharpe Ratio = 2.09
 
 # Research Findings
 
